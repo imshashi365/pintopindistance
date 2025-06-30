@@ -47,6 +47,7 @@ export default function RootLayout({
         <div itemScope itemType="https://schema.org/WebApplication">
           <meta itemProp="name" content="Pin to Pin Distance Calculator" />
           <meta itemProp="description" content="Free and accurate pin to pin distance calculator for e-Way Bill in India. Calculate driving distance between any two pincodes." />
+          <meta name="google-site-verification" content="YGXKmJCxxlsgPX4JBt4fzvEHr-4STHhCTzYS1c_7Er4" />
         </div>
         <Header />
         <main className="flex-grow">
