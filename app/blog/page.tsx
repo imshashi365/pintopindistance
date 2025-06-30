@@ -24,22 +24,6 @@ const blogPosts = [
     date: '2025-06-15',
     readTime: '4 min read',
     category: 'GST & Compliance'
-  },
-  {
-    slug: 'importance-of-accurate-pincode-distance',
-    title: 'Why Accurate Pincode Distance Matters for Your Business',
-    excerpt: 'Discover how precise pincode distance calculations can save your business time and money.',
-    date: '2025-06-10',
-    readTime: '5 min read',
-    category: 'Logistics'
-  },
-  {
-    slug: 'gst-rules-for-interstate-transport',
-    title: 'Understanding GST Rules for Interstate Transport in India',
-    excerpt: 'A comprehensive guide to GST rules and regulations for interstate transportation.',
-    date: '2025-06-05',
-    readTime: '6 min read',
-    category: 'GST & Compliance'
   }
 ];
 
@@ -82,7 +66,7 @@ export default function BlogPage() {
         ))}
       </div>
       
-      <div className="mt-16">
+      {/* <div className="mt-16">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Browse by Category</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {Array.from(new Set(blogPosts.map(post => post.category))).map(category => {
@@ -99,7 +83,7 @@ export default function BlogPage() {
             );
           })}
         </div>
-      </div>
+      </div> */}
       
       <div className="mt-12 bg-blue-50 p-6 rounded-xl">
         <h2 className="text-2xl font-bold text-gray-900 mb-4">Need Help with e-Way Bill?</h2>

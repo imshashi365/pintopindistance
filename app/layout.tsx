@@ -42,12 +42,12 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className="h-full bg-gray-50 scroll-smooth">
-      <body className="min-h-full flex flex-col bg-white">
-    <div itemScope itemType="https://schema.org/WebApplication">
-      <meta itemProp="name" content="Pin to Pin Distance Calculator" />
-      <meta itemProp="description" content="Free and accurate pin to pin distance calculator for e-Way Bill in India. Calculate driving distance between any two pincodes." />
-    </div>
+    <html lang="en">
+      <body className="flex flex-col min-h-screen">
+        <div itemScope itemType="https://schema.org/WebApplication">
+          <meta itemProp="name" content="Pin to Pin Distance Calculator" />
+          <meta itemProp="description" content="Free and accurate pin to pin distance calculator for e-Way Bill in India. Calculate driving distance between any two pincodes." />
+        </div>
         <Header />
         <main className="flex-grow">
           {children}
