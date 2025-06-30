@@ -9,10 +9,10 @@ export const metadata: Metadata = {
     title: 'How to Calculate Pincode Distance for e-Way Bill',
     description: 'Compare our fast, free pincode distance calculator with the official GSTN tool for e-Way Bill. Find out which is faster and more efficient.',
     type: 'article',
-    url: 'https://pin-to-pin-distance.in/blog/pin-to-pin-distance-e-waybill',
+    url: 'https://pin-to-pin-distance.xyz/blog/pin-to-pin-distance-e-waybill',
     images: [
       {
-        url: 'https://pin-to-pin-distance.in/assets/blog-cover.png',
+        url: 'https://pin-to-pin-distance.xyz/assets/blog-cover.png',
         width: 1200,
         height: 630,
         alt: 'Pin to Pin Distance Calculator for e-Way Bill',
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Pin to Pin Distance Calculator for GST e-Way Bill',
     description: 'Accurate and GST-compliant pincode distance tool with road travel data. No captcha, no login.',
-    images: ['https://pin-to-pin-distance.in/assets/blog-cover.png'],
+    images: ['/assets/blog-cover.png'],
   },
 };
 
