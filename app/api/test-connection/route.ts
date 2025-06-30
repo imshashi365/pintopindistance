@@ -31,13 +31,13 @@ export async function GET() {
       }
     });
     
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Database connection error:', error);
     return NextResponse.json(
       { 
         connected: false, 
         error: 'Failed to connect to MongoDB',
-        details: error.message 
+        details: error instanceof Error ? error.message : 'Unknown error occurred'
       },
       { status: 500 }
     );
