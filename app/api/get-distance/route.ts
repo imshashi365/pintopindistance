@@ -1,7 +1,55 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '../../../lib/dbConnect';
 import Pincode from '../../../models/Pincode';
+import FailedDistanceLog from '../../../models/FailedDistanceLog';
 import axios from 'axios';
+
+// Helper function to log failed attempts
+async function logFailedAttempt(
+  pincode1: string,
+  pincode2: string,
+  fromLat: number,
+  fromLng: number,
+  toLat: number,
+  toLng: number,
+  error: any
+) {
+  const errorMessage = error.response?.data?.error?.message || error.message;
+  const errorCode = error.response?.status?.toString() || 'UNKNOWN_ERROR';
+  
+  try {
+    // First, try to find and update an existing failed attempt
+    const existingLog = await FailedDistanceLog.findOneAndUpdate(
+      { fromPincode: pincode1, toPincode: pincode2 },
+      {
+        $set: {
+          fromLat,
+          fromLng,
+          toLat,
+          toLng,
+          errorMessage,
+          errorCode,
+          responseData: error.response?.data || {},
+          lastAttempt: new Date(),
+        },
+        $inc: { retryCount: 1 },
+      },
+      { upsert: true, new: true, setDefaultsOnInsert: true }
+    );
+
+    // If this is a new record, set the initial timestamp
+    if (existingLog.retryCount === 1) {
+      await FailedDistanceLog.updateOne(
+        { _id: existingLog._id },
+        { $set: { timestamp: new Date() } }
+      );
+    }
+
+    console.log(`Logged failed attempt for pincodes ${pincode1} -> ${pincode2}`);
+  } catch (logError) {
+    console.error('Failed to log error to database:', logError);
+  }
+}
 
 export async function POST(request: Request) {
   try {
@@ -39,14 +87,18 @@ export async function POST(request: Request) {
 
     // Call OpenRouteService API
     let response;
+    const coordinates = [
+      [source.longitude, source.latitude],
+      [destination.longitude, destination.latitude]
+    ];
+    
     try {
+      console.log(`Attempting to calculate distance between pincodes: ${pincode1} and ${pincode2}`);
+      
       response = await axios.post(
         'https://api.openrouteservice.org/v2/directions/driving-car/geojson',
         {
-          coordinates: [
-            [source.longitude, source.latitude],
-            [destination.longitude, destination.latitude],
-          ],
+          coordinates,
           preference: 'recommended',
         },
         {
@@ -54,18 +106,48 @@ export async function POST(request: Request) {
             'Authorization': process.env.OPENROUTE_API_KEY,
             'Content-Type': 'application/json',
           },
-          timeout: 10000, // 10 second timeout
+          timeout: 10000,
         }
       );
-      console.log('API Response:', JSON.stringify(response.data, null, 2));
     } catch (error: any) {
-      console.error('API Error:', error.response?.data || error.message);
-      throw new Error(error.response?.data?.error?.message || 'Failed to connect to routing service');
+      // Log the detailed error to the database
+      await logFailedAttempt(
+        pincode1,
+        pincode2,
+        source.latitude,
+        source.longitude,
+        destination.latitude,
+        destination.longitude,
+        error
+      );
+
+      // Return a user-friendly error message
+      return NextResponse.json(
+        { 
+          error: `Failed to calculate distance between pincodes ${pincode1} and ${pincode2}`,
+          details: error.response?.data?.error?.message || error.message,
+          code: error.response?.status || 500
+        },
+        { status: error.response?.status || 500 }
+      );
     }
 
     if (!response.data.features || response.data.features.length === 0) {
-      console.error('No route found in response:', response.data);
-      throw new Error('No route could be calculated between these locations');
+      const error = new Error('No route features in response');
+      await logFailedAttempt(
+        pincode1,
+        pincode2,
+        source.latitude,
+        source.longitude,
+        destination.latitude,
+        destination.longitude,
+        { response: { data: response.data } }
+      );
+      
+      return NextResponse.json(
+        { error: `No route could be calculated between pincodes ${pincode1} and ${pincode2}` },
+        { status: 404 }
+      );
     }
 
     const route = response.data.features[0];
