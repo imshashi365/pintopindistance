@@ -4,50 +4,83 @@ import Pincode from '../../../models/Pincode';
 import FailedDistanceLog from '../../../models/FailedDistanceLog';
 import axios from 'axios';
 
-// Helper function to log failed attempts
+// Add this interface at the top of the file, after the imports
+interface Coordinate {
+  lat?: number;
+  lng?: number;
+  latitude?: number;
+  longitude?: number;
+}
+
+// Then update the logFailedAttempt function
 async function logFailedAttempt(
   pincode1: string,
   pincode2: string,
-  fromLat: number,
-  fromLng: number,
-  toLat: number,
-  toLng: number,
+  fromLat: number | null,
+  fromLng: number | null,
+  toLat: number | null,
+  toLng: number | null,
   error: any
 ) {
-  const errorMessage = error.response?.data?.error?.message || error.message;
-  const errorCode = error.response?.status?.toString() || 'UNKNOWN_ERROR';
+  const errorMessage = error.response?.data?.error?.message || error.message || 'Unknown error';
+  const errorCode = error.response?.status?.toString() || 'NOT_FOUND';
   
   try {
-    // First, try to find and update an existing failed attempt
-    const existingLog = await FailedDistanceLog.findOneAndUpdate(
+    // Helper function to get coordinates
+    const getCoords = async (pincode: string, lat: number | null, lng: number | null): Promise<Coordinate> => {
+      if (lat !== null && lng !== null) {
+        return { lat, lng, latitude: lat, longitude: lng };
+      }
+      const doc = await Pincode.findOne({ pincode }, 'latitude longitude').lean<{ latitude: number; longitude: number }>().exec();
+      return doc ? { 
+        lat: doc.latitude, 
+        lng: doc.longitude,
+        latitude: doc.latitude,
+        longitude: doc.longitude
+      } : { lat: 0, lng: 0, latitude: 0, longitude: 0 };
+    };
+
+    // Get coordinates for both source and destination
+    const [sourceCoords, destCoords] = await Promise.all([
+      getCoords(pincode1, fromLat, fromLng),
+      getCoords(pincode2, toLat, toLng)
+    ]);
+
+    // Prepare the log entry with proper null checks
+    const logEntry = {
+      fromPincode: pincode1,
+      toPincode: pincode2,
+      fromLat: sourceCoords.lat || sourceCoords.latitude || 0,
+      fromLng: sourceCoords.lng || sourceCoords.longitude || 0,
+      toLat: destCoords.lat || destCoords.latitude || 0,
+      toLng: destCoords.lng || destCoords.longitude || 0,
+      errorMessage,
+      errorCode,
+      responseData: error.response?.data || {},
+      lastAttempt: new Date(),
+    };
+
+    // Find and update or create a new log entry
+    await FailedDistanceLog.findOneAndUpdate(
       { fromPincode: pincode1, toPincode: pincode2 },
       {
-        $set: {
-          fromLat,
-          fromLng,
-          toLat,
-          toLng,
-          errorMessage,
-          errorCode,
-          responseData: error.response?.data || {},
-          lastAttempt: new Date(),
-        },
+        $set: logEntry,
         $inc: { retryCount: 1 },
+        $setOnInsert: { timestamp: new Date() }
       },
-      { upsert: true, new: true, setDefaultsOnInsert: true }
+      { upsert: true, new: true }
     );
 
-    // If this is a new record, set the initial timestamp
-    if (existingLog.retryCount === 1) {
-      await FailedDistanceLog.updateOne(
-        { _id: existingLog._id },
-        { $set: { timestamp: new Date() } }
-      );
-    }
+    console.log(`Logged failed attempt for pincodes ${pincode1} -> ${pincode2}: ${errorMessage}`);
 
-    console.log(`Logged failed attempt for pincodes ${pincode1} -> ${pincode2}`);
   } catch (logError) {
     console.error('Failed to log error to database:', logError);
+    console.error('Failed pincode lookup:', {
+      fromPincode: pincode1,
+      toPincode: pincode2,
+      error: errorMessage,
+      timestamp: new Date().toISOString()
+    });
   }
 }
 
@@ -71,6 +104,30 @@ export async function POST(request: Request) {
     ]);
 
     if (!source || !destination) {
+      // Log the failed attempt with available data
+      if (!source) {
+        await logFailedAttempt(
+          pincode1,
+          pincode2,
+          0, // Default latitude
+          0, // Default longitude
+          0, // Default latitude
+          0, // Default longitude
+          { message: `Pincode not found in database: ${pincode1}` }
+        );
+      }
+      if (!destination) {
+        await logFailedAttempt(
+          pincode1,
+          pincode2,
+          0, // Default latitude
+          0, // Default longitude
+          0, // Default latitude
+          0, // Default longitude
+          { message: `Pincode not found in database: ${pincode2}` }
+        );
+      }
+
       return NextResponse.json(
         { error: 'One or both pincodes not found' },
         { status: 404 }
