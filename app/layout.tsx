@@ -5,7 +5,7 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 
 export const metadata = {
-  title: 'Pin to Pin Distance Calculator – Accurate Pincode Distance for e-Way Bill India',
+  title: 'Fast & No Captcha – Pin to Pin Distance Calculator for e-Way Bill India',
   description: 'Free and accurate pin to pin distance calculator for e-Way Bill in India. Enter any two pincodes and get valid driving distance and travel time. GST-compliant tool.',
   keywords: 'pin to pin distance, distance between pincodes, e-way bill distance calculator, gst distance, pincode distance india',
   metadataBase: new URL('https://pin-to-pin-distance.xyz'),
@@ -13,7 +13,7 @@ export const metadata = {
     icon: '/favicon.ico',
   },
   openGraph: {
-    title: 'Pin to Pin Distance Calculator – Accurate Pincode Distance for e-Way Bill',
+    title: 'Fast & No Captcha – Pin to Pin Distance Calculator for e-Way Bill India',
     description: 'Free and accurate pin to pin distance calculator for e-Way Bill in India. Get valid driving distance and travel time between any two pincodes.',
     url: 'https://pin-to-pin-distance.xyz',
     siteName: 'Pincode Distance Calculator',
