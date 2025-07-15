@@ -4,7 +4,6 @@ import Pincode from '../../../models/Pincode';
 import FailedDistanceLog from '../../../models/FailedDistanceLog';
 import axios from 'axios';
 
-// Add this interface at the top of the file, after the imports
 interface Coordinate {
   lat?: number;
   lng?: number;
@@ -12,7 +11,33 @@ interface Coordinate {
   longitude?: number;
 }
 
-// Then update the logFailedAttempt function
+function calculateStraightLineDistance(
+  lat1: number, lon1: number,
+  lat2: number, lon2: number
+): { distance: number; duration: number } {
+  // Haversine formula to calculate distance between two points
+  const R = 6371; // Radius of the Earth in km
+  const dLat = (lat2 - lat1) * (Math.PI / 180);
+  const dLon = (lon2 - lon1) * (Math.PI / 180);
+  const a = 
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * (Math.PI / 180)) * 
+    Math.cos(lat2 * (Math.PI / 180)) * 
+    Math.sin(dLon / 2) * 
+    Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const distance = R * c; // Distance in km
+
+  // Estimate driving duration (assuming average speed of 40 km/h)
+  const averageSpeed = 40; // km/h
+  const duration = (distance / averageSpeed) * 60; // Convert to minutes
+
+  return {
+    distance: parseFloat(distance.toFixed(2)),
+    duration: Math.round(duration)
+  };
+}
+
 async function logFailedAttempt(
   pincode1: string,
   pincode2: string,
@@ -166,72 +191,65 @@ export async function POST(request: Request) {
           timeout: 10000,
         }
       );
-    } catch (error: any) {
-      // Log the detailed error to the database
-      await logFailedAttempt(
-        pincode1,
-        pincode2,
-        source.latitude,
-        source.longitude,
-        destination.latitude,
-        destination.longitude,
-        error
-      );
 
-      // Return a user-friendly error message
-      return NextResponse.json(
-        { 
-          error: `Failed to calculate distance between pincodes ${pincode1} and ${pincode2}`,
-          details: error.response?.data?.error?.message || error.message,
-          code: error.response?.status || 500
+      if (!response.data.features || response.data.features.length === 0) {
+        throw new Error('No route features in response');
+      }
+
+      const route = response.data.features[0];
+      if (!route.properties || !route.properties.summary) {
+        throw new Error('Invalid route data received from service');
+      }
+
+      const distance = (route.properties.summary.distance / 1000).toFixed(2); // Convert to km
+      const duration = Math.round(route.properties.summary.duration / 60); // Convert to minutes
+
+      return NextResponse.json({
+        distance: parseFloat(distance),
+        duration,
+        source: {
+          pincode: source.pincode,
+          location: source.officename || 'Unknown Location',
         },
-        { status: error.response?.status || 500 }
-      );
-    }
-
-    if (!response.data.features || response.data.features.length === 0) {
-      const error = new Error('No route features in response');
-      await logFailedAttempt(
-        pincode1,
-        pincode2,
-        source.latitude,
-        source.longitude,
-        destination.latitude,
-        destination.longitude,
-        { response: { data: response.data } }
+        destination: {
+          pincode: destination.pincode,
+          location: destination.officename || 'Unknown Location',
+        },
+        routingMethod: 'driving'
+      });
+      
+    } catch (error: any) {
+      console.warn('OpenRouteService API failed, falling back to straight-line distance calculation');
+      
+      // Fallback to straight-line distance calculation
+      const straightLine = calculateStraightLineDistance(
+        source.latitude, source.longitude,
+        destination.latitude, destination.longitude
       );
       
-      return NextResponse.json(
-        { error: `No route could be calculated between pincodes ${pincode1} and ${pincode2}` },
-        { status: 404 }
-      );
+      return NextResponse.json({
+        distance: straightLine.distance,
+        duration: straightLine.duration,
+        source: {
+          pincode: source.pincode,
+          location: source.officename || 'Unknown Location',
+        },
+        destination: {
+          pincode: destination.pincode,
+          location: destination.officename || 'Unknown Location',
+        },
+        note: 'Straight-line distance (as the crow flies) - actual road distance may vary',
+        routingMethod: 'straight-line'
+      });
     }
-
-    const route = response.data.features[0];
-    if (!route.properties || !route.properties.summary) {
-      console.error('Invalid route data:', route);
-      throw new Error('Invalid route data received from service');
-    }
-
-    const distance = (route.properties.summary.distance / 1000).toFixed(2); // Convert to km
-    const duration = Math.round(route.properties.summary.duration / 60); // Convert to minutes
-
-    return NextResponse.json({
-      distance: parseFloat(distance),
-      duration,
-      source: {
-        pincode: source.pincode,
-        location: source.officename || 'Unknown Location',
-      },
-      destination: {
-        pincode: destination.pincode,
-        location: destination.officename || 'Unknown Location',
-      },
-    });
+    
   } catch (error) {
-    console.error('Error calculating distance:', error);
+    console.error('Error in get-distance endpoint:', error);
     return NextResponse.json(
-      { error: 'Failed to calculate distance' },
+      { 
+        error: 'Failed to calculate distance',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
       { status: 500 }
     );
   }
