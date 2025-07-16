@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { NextSeo, FAQPageJsonLd, SoftwareAppJsonLd } from 'next-seo';
+import { NextSeo, FAQPageJsonLd, SoftwareAppJsonLd, VideoJsonLd } from 'next-seo';
+import YouTube from 'react-youtube';
 
 type Location = {
   pincode: string;
@@ -177,6 +178,18 @@ export default function Home() {
         }}
         price="0"
         priceCurrency="INR"
+      />
+      <VideoJsonLd
+        name="How to Use Pin to Pin Distance Calculator - Complete Guide"
+        description="Learn how to quickly calculate distance between any two Indian pincodes with our easy-to-use distance calculator tool. Step-by-step guide with visual demonstration."
+        thumbnailUrls={["https://img.youtube.com/vi/R9wT-LBVA5s/maxresdefault.jpg"]}
+        uploadDate="2024-07-15T08:00:00+05:30"
+        duration="PT2M30S"
+        contentUrl="https://www.youtube.com/watch?v=R9wT-LBVA5s"
+        embedUrl="https://www.youtube.com/embed/R9wT-LBVA5s"
+        regionsAllowed="IN"
+        hasPart={[]}
+        watchCount={1000}
       />
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
         {/* Main Content Container */}
@@ -373,6 +386,37 @@ export default function Home() {
                 </ul>
 
                 <h2 className="text-2xl font-bold text-gray-900 mt-8">How Does It Work?</h2>
+
+                <div className="my-6 aspect-video max-w-3xl mx-auto">
+                  <div itemScope itemType="https://schema.org/VideoObject" className="w-full h-full">
+                    <meta itemProp="name" content="How to Calculate Pin to Pin Distance for e-Way Bill | GST Tool 2025" />
+                    <meta itemProp="description" content="Introducing the Pin to Pin Distance Calculato — your one-stop solution for generating accurate pincode distance for GST compliance and e-Way Bill generation." />
+                    <meta itemProp="uploadDate" content="2024-07-15T08:00:00+05:30" />
+                    <meta itemProp="thumbnailUrl" content="https://img.youtube.com/vi/R9wT-LBVA5s/maxresdefault.jpg" />
+                    <meta itemProp="embedUrl" content="https://www.youtube.com/embed/R9wT-LBVA5s" />
+                    
+                    <YouTube 
+                      videoId="R9wT-LBVA5s"
+                      opts={{
+                        width: '100%',
+                        height: '100%',
+                        playerVars: {
+                          autoplay: 0,
+                          rel: 0,
+                          modestbranding: 1,
+                        },
+                      }}
+                      className="w-full h-full rounded-lg shadow-lg"
+                      title="How to find Pin to Pin Distance How to Calculate Pin to Pin Distance for e-Way Bill | GST Tool 2025"
+                      aria-label="Video tutorial on using the pincode distance calculator"
+                    />
+                    
+                    <div className="mt-2 text-sm text-gray-600" itemProp="description">
+                      Watch this video to learn how to calculate distances between any two Indian pincodes with our free online tool.
+                    </div>
+                  </div>
+                </div>
+
                 <p className="text-gray-700">
                   Simply enter the <strong>from pincode</strong> and <strong>to pincode</strong> in the calculator above.
                   Our system will look up their coordinates, calculate the actual <strong>road distance</strong> using real driving routes, and show the result with estimated travel time.
