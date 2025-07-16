@@ -19,7 +19,7 @@ type DistanceResult = {
 // SEO-optimized content sections
 const seoContent = {
   intro: {
-    title: "Fast & No Captcha – Pin to Pin Distance Calculator for e-Way Bill India",
+    title: "Pin to Pin Distance Calculator – Accurate Pincode Distance for e-Way Bill",
     description: "Get instant, accurate distance between any two Indian pincodes. Our free calculator provides real driving distances perfect for e-Way Bill generation and GST compliance. Trusted by professionals across India.",
     features: [
       "✓ 100% Free and GST-compliant distance calculator",
