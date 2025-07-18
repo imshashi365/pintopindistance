@@ -15,24 +15,32 @@ const blogPosts = [
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = 'https://www.pin-to-pin-distance.xyz';
+  const currentDate = new Date().toISOString().split('T')[0];
 
   // URLs for static pages
   const staticRoutes = [
-    '/',
-    '/about-us',
-    '/contact-us',
-    '/privacy-policy',
-    '/blog',
+    { url: '/', priority: 1.0, changefreq: 'daily' },
+    { url: '/about-us', priority: 0.8, changefreq: 'weekly' },
+    { url: '/contact-us', priority: 0.8, changefreq: 'weekly' },
+    { url: '/privacy-policy', priority: 0.5, changefreq: 'monthly' },
+    { url: '/blog', priority: 0.9, changefreq: 'weekly' },
   ].map((route) => ({
-    url: `${baseUrl}${route}`,
-    lastModified: new Date(),
+    url: `${baseUrl}${route.url}`,
+    lastModified: currentDate,
+    changeFrequency: route.changefreq as 'daily' | 'weekly' | 'monthly' | 'yearly',
+    priority: route.priority,
   }));
 
   // URLs for dynamic blog posts
   const blogRoutes = blogPosts.map((post) => ({
     url: `${baseUrl}/blog/${post.slug}`,
-    lastModified: new Date(post.date),
+    lastModified: post.date,
+    changeFrequency: 'weekly' as const,
+    priority: 0.7,
   }));
 
-  return [...staticRoutes, ...blogRoutes];
+  return [
+    ...staticRoutes,
+    ...blogRoutes,
+  ];
 }
