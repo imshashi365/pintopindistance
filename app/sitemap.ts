@@ -2,7 +2,7 @@
 import { MetadataRoute } from 'next'
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://www.pin-to-pin-distance.xyz'
+  const baseUrl = 'https://pin-to-pin-distance.xyz'
   
   const blogPosts = [
     {
