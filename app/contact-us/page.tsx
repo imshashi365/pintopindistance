@@ -5,6 +5,9 @@ import ContactForm from './ContactForm'; // Import the new client component
 export const metadata: Metadata = {
   title: 'Contact Us - Pin To Pin Distance',
   description: 'Get in touch with the Pin To Pin Distance team. We welcome your questions, feedback, and suggestions.',
+  alternates: {
+    canonical: 'https://pin-to-pin-distance.xyz/contact-us',
+  },
 };
 
 const ContactUsPage = () => {

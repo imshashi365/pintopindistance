@@ -83,12 +83,16 @@ export async function generateMetadata({
   return {
     title: `${post.title} | Pin to Pin Distance Blog`,
     description: post.excerpt,
+    alternates: {
+      canonical: `https://pin-to-pin-distance.xyz/blog/${params.slug}`,
+    },
     openGraph: {
       title: post.title,
       description: post.excerpt,
       type: 'article',
       publishedTime: post.date,
       authors: [post.author.name],
+      url: `https://pin-to-pin-distance.xyz/blog/${params.slug}`,
     },
   };
 }

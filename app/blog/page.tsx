@@ -2,6 +2,9 @@ import Link from 'next/link';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
+  alternates: {
+    canonical: 'https://pin-to-pin-distance.xyz/blog',
+  },
   title: 'Blog - Pin to Pin Distance Calculator',
   description: 'Latest articles about e-Way Bill, GST compliance, and logistics in India',
 };
