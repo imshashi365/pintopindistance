@@ -1,12 +1,15 @@
 // app/sitemap.ts
 import { MetadataRoute } from 'next';
 
-function ensureHttpsUrl(url: string): string {
-  // Ensure the URL uses HTTPS
-  let processedUrl = url.replace(/^http:\/\//i, 'https://');
-  if (!processedUrl.startsWith('https://')) {
-    processedUrl = `https://${processedUrl}`;
+function ensureHttpsAndWww(url: string): string {
+  // Ensure the URL starts with https://
+  let processedUrl = url.startsWith('http') ? url : `https://${url}`;
+  
+  // Ensure www. is present
+  if (!processedUrl.includes('www.')) {
+    processedUrl = processedUrl.replace('https://', 'https://www.');
   }
+  
   // Remove trailing slash for consistency
   return processedUrl.endsWith('/') ? processedUrl.slice(0, -1) : processedUrl;
 }
@@ -24,7 +27,7 @@ const blogPosts = [
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = ensureHttpsUrl('www.pin-to-pin-distance.xyz');
+  const baseUrl = ensureHttpsAndWww('pin-to-pin-distance.xyz');
   const currentDate = new Date();
 
   // Static routes with their priorities
