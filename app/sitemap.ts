@@ -24,7 +24,7 @@ const blogPosts = [
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = ensureHttpsUrl('pin-to-pin-distance.xyz');
+  const baseUrl = ensureHttpsUrl('www.pin-to-pin-distance.xyz');
   const currentDate = new Date();
 
   // Static routes with their priorities
