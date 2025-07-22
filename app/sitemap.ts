@@ -5,10 +5,8 @@ function ensureHttpsAndWww(url: string): string {
   // Ensure the URL starts with https://
   let processedUrl = url.startsWith('http') ? url : `https://${url}`;
   
-  // Ensure www. is present
-  if (!processedUrl.includes('www.')) {
-    processedUrl = processedUrl.replace('https://', 'https://www.');
-  }
+  // Remove www. if present
+  processedUrl = processedUrl.replace('www.', '');
   
   // Remove trailing slash for consistency
   return processedUrl.endsWith('/') ? processedUrl.slice(0, -1) : processedUrl;

@@ -6,6 +6,6 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: '*',
       allow: '/',
     },
-    sitemap: 'https://www.pin-to-pin-distance.xyz/sitemap.xml',
+    sitemap: 'https://pin-to-pin-distance.xyz/sitemap.xml',
   }
 }
